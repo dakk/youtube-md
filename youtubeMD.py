@@ -22,7 +22,8 @@ pygtk.require('2.0')
 import gtk
 import httplib
 import urlparse
-from threading import Thread
+import sys
+from threading import Thread, Event
 import os
 
 gtk.gdk.threads_init()
@@ -71,6 +72,7 @@ class YoutubeMusicDownlaod:
 	last_songs = "list.md"
 	icon = gtk.Image().set_from_stock(gtk.STOCK_GO_DOWN, 16)
 	thread = None
+	
 	
 	
 	def __init__(self):
@@ -181,7 +183,7 @@ class YoutubeMusicDownlaod:
 		
 	def downloadEvent(self, window):
 		if self.thread == None:
-			self.thread = Thread(target=self.downloadThread)
+			self.thread = Thread(target=self.downloadThread)			
 			
 		self.thread.start()
 		
