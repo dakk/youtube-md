@@ -68,12 +68,19 @@ class YoutubeMusicDownlaod:
 	queue = []
 	youtube_dl = "youtube-dl"
 	folderUri = "~/"
+	last_songs = "list.md"
 	icon = gtk.Image().set_from_stock(gtk.STOCK_GO_DOWN, 16)
 	thread = None
 	
 	
 	def __init__(self):
-		pass
+		try:
+			f = open(self.last_songs, "r")
+			data = f.read()
+			f.close()
+			self.queue = data.split("\n")[0:-1]
+		except:
+			pass
 		
 		
 	def checkExternalProgram(self):
@@ -81,6 +88,15 @@ class YoutubeMusicDownlaod:
 		
 		
 	def destroy(self, widget, data = None):
+		try:
+			f = open(self.last_songs, "w")
+			
+			for x in self.queue:
+				f.write(x+"\n")
+			f.close()
+		except: 
+			pass
+			
 		gtk.main_quit()
 	
 	
@@ -122,7 +138,12 @@ class YoutubeMusicDownlaod:
 		
 	
 	def removeUrlEvent(self, window):
-		pass
+		#iters = self.urlListView.get_selection().get_selected()[1]
+			
+		#self.urlList.remove(iters)
+		#self.queue.remove(self.urlListView.get_value(iters, 1))
+		self.urlList.clear()
+		self.queue = []
 		
 		
 	def aboutEvent(self, widget):
@@ -146,14 +167,16 @@ class YoutubeMusicDownlaod:
 		
 		for link in self.queue:				
 			self.progressBar.set_text("Downloading "+link)
-			os.system(self.youtube_dl+" "+link+" --extract-audio --audio-format mp3 -t"])
+			os.system("cd "+self.folderUri+" && "+self.youtube_dl+" "+link+" --extract-audio --audio-format mp3 -t")
 			progress += step
 			self.progressBar.set_fraction(progress)
+			
 				
-			time.sleep(2)
 			
 		self.progressBar.set_text("Completed")
 		self.down_button.set_visible(True)
+		self.urlList.clear()
+		self.queue = []
 		
 		
 	def downloadEvent(self, window):
@@ -193,7 +216,7 @@ class YoutubeMusicDownlaod:
    
    		iconw = gtk.Image()
 		iconw.set_from_stock(gtk.STOCK_REMOVE, 16)
-		remove_button = toolbar.append_item("Remove", "Remove selected url", "Private", iconw, self.removeUrlEvent)
+		remove_button = toolbar.append_item("Clear", "Remove all urls", "Private", iconw, self.removeUrlEvent)
 		
    		iconw = gtk.Image()
 		iconw.set_from_stock(gtk.STOCK_GO_DOWN, 16)
@@ -232,10 +255,10 @@ class YoutubeMusicDownlaod:
 
 		self.urlListView = gtk.TreeView(self.urlList)
 		
-		rendererText = gtk.CellRendererText()
-		column = gtk.TreeViewColumn("State", rendererText, text=0)
-		column.set_sort_column_id(0)    
-		self.urlListView.append_column(column)
+		#rendererText = gtk.CellRendererText()
+		#column = gtk.TreeViewColumn("State", rendererText, text=0)
+		#column.set_sort_column_id(0)    
+		#self.urlListView.append_column(column)
 		
 		rendererText = gtk.CellRendererText()
 		column = gtk.TreeViewColumn("Url", rendererText, text=1)
@@ -243,6 +266,11 @@ class YoutubeMusicDownlaod:
 		self.urlListView.append_column(column)
   
 		sw.add(self.urlListView)
+		
+		
+		# Load saved urls
+		for x in self.queue:	
+			self.urlList.append(["Queued", x])
 		
 		
 		
